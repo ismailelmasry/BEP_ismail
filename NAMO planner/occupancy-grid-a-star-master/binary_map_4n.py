@@ -7,14 +7,27 @@ from utils import plot_path
 
 if __name__ == '__main__':
 
-    # load the map
+    #load the map
     #Scenario map
-    s_map = 'example_map_binary1.png'
+    s_map = 'example_map_binary.png'
     gmap0 = OccupancyGridMap.from_png('example_map_binary.png', 1)
     gmap = OccupancyGridMap.from_png(s_map, 1)
     gmap1 = OccupancyGridMap.from_png(s_map, 1)
 
-
+    #object formulation 
+    #object 1:
+    for i in range (73,113):
+        for j in range(155,165):
+            gmap.set_data((i,j), 0.8)
+            gmap1.set_data((i,j), 0.8)
+    #object 2:
+    for i in range (114,130):
+        for j in range(135,165):
+            gmap.set_data((i,j), 0.9)
+            gmap1.set_data((i,j), 0.9)
+        
+            
+    
     # set a start and an end node (in meters)
     goal_node = (50,50)
     start_node= (285.0, 86.0)
@@ -32,6 +45,7 @@ if __name__ == '__main__':
     # run A*
     path, path_px = a_star(start_node, goal_node, gmap, movement='4N')
 
+    
 
     if path:
 

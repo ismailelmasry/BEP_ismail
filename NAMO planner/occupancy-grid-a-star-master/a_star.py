@@ -14,35 +14,8 @@ def _get_movements_4n():
             (0, -1, 1.0)]
 
 
-def _get_movements_8n():
-    """
-    Get all possible 8-connectivity movements. Equivalent to get_movements_in_radius(1).
-    :return: list of movements with cost [(dx, dy, movement_cost)]
-    """
-    s2 = math.sqrt(2)
-    return [(1, 0, 1.0),
-            (0, 1, 1.0),
-            (-1, 0, 1.0),
-            (0, -1, 1.0),
-            (1, 1, s2),
-            (-1, 1, s2),
-            (-1, -1, s2),
-            (1, -1, s2)]
-
-
 def a_star(start_m, goal_m, gmap, movement='8N', occupancy_cost_factor=3):
-    """
-    A* for 2D occupancy grid.
-
-    :param start_m: start node (x, y) in meters
-    :param goal_m: goal node (x, y) in meters
-    :param gmap: the grid map
-    :param movement: select between 4-connectivity ('4N') and 8-connectivity ('8N', default)
-    :param occupancy_cost_factor: a number the will be multiplied by the occupancy probability
-        of a grid map cell to give the additional movement cost to this cell (default: 3).
-
-    :return: a tuple that contains: (the resulting path in meters, the resulting path in data array indices)
-    """
+   
 
     # get array indices of start and goal
     start = gmap.get_index_from_coordinates(start_m[0], start_m[1])
@@ -67,8 +40,6 @@ def a_star(start_m, goal_m, gmap, movement='8N', occupancy_cost_factor=3):
     # get possible movements
     if movement == '4N':
         movements = _get_movements_4n()
-    elif movement == '8N':
-        movements = _get_movements_8n()
     else:
         raise ValueError('Unknown movement')
 
@@ -127,4 +98,4 @@ def a_star(start_m, goal_m, gmap, movement='8N', occupancy_cost_factor=3):
         path.reverse()
         path_idx.reverse()
 
-    return path, path_idx
+    return path, path_idx, new_total_cost_to_goal
