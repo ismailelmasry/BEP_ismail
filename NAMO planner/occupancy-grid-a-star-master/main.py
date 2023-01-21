@@ -2,6 +2,7 @@ from gridmap import OccupancyGridMap
 import matplotlib.pyplot as plt
 from a_star import a_star
 from utils import plot_path
+from mani_planner import manip_planner
 
 
 
@@ -19,10 +20,17 @@ if __name__ == '__main__':
     gmap1_manip = OccupancyGridMap.from_png(s_map, 1)
     gmap2_manip = OccupancyGridMap.from_png(s_map, 1)
 
+    # 'to block door way 1: x1=[73,113] y1=[130,169]
+    # to block door way 2: x2=[280,295] y2 = [368,413]
+    # to block door way 1 with two objects:  x1=[73,113] y1=[155,165] x2=[113,130] y2 = [135,165]
     #object formulation 
     #object 1:
-    for i in range (73,113):
-        for j in range(155,165):
+    x1 =[73,113]
+    x2 = [280,295]
+    y1 =[150,169]
+    y2 =[368,413]
+    for i in range (x1[0],x1[1]):
+        for j in range(y1[0],y1[1]):
             gmap.set_data((i,j), 0.8)
             gmap1.set_data((i,j), 0.8)
             gmap2.set_data((i,j), 0.8)
@@ -31,8 +39,8 @@ if __name__ == '__main__':
             gmap2_manip.set_data((i,j), 0.8)
             
     #object 2:
-    for i in range (113,130):
-        for j in range(135,165):
+    for i in range (x2[0],x2[1]):
+        for j in range(y2[0],y2[1]):
             gmap.set_data((i,j), 0.9)
             gmap1.set_data((i,j), 0.9)
             gmap2.set_data((i,j), 0.9)
@@ -40,12 +48,13 @@ if __name__ == '__main__':
             gmap1_manip.set_data((i,j), 0.9)
             gmap2_manip.set_data((i,j), 0.9)
         
-    cost_est = 0
+
     
     # set a start and an end node (in meters)
-    goal_node = (50,200)
+    goal_node = (360,360)
     start_node= (285.0, 86.0)
     obj_param = [0.8,0.9]
+    
     
 
     gmap.plot()
@@ -63,13 +72,15 @@ if __name__ == '__main__':
 
     if path:
         plot_path(path_px)
-        cost_est = cost_astar
+        
     else:
         plt.show()
         print("path is blocked, attempting to remove dynamic obstacles")
         if gmap0 != gmap:
             count = 0
-            for o in obj_param:
+            manip_plan= manip_planner(gmap0,gmap1_manip,s_map,gmap2_manip,obj_param,start_node,goal_node,x1,x2,y1,y2)
+            print(manip_plan)
+            for o in manip_plan:
                 obj_x = []
                 obj_y = []
                 for y, x_val in enumerate(gmap.data):
@@ -77,14 +88,13 @@ if __name__ == '__main__':
                         if y_val != 0 and  y_val == o:
                             obj_x.append(x)
                             obj_y.append(y)
-                            
-                            # gmap.set_data((x,y), 0)
-                            # if count == 0:
-                            #     gmap2.set_data((x,y), 0)
-                            # if gmap.data[x, y] == gmap0.data[x, y]:
-                            #     object_manip = True
-                            # else:
-                            #     object_manip = False
+                            gmap.set_data((x,y), 0)
+                            if count == 0:
+                                gmap2.set_data((x,y), 0)
+                            if gmap.data[x, y] == gmap0.data[x, y]:
+                                object_manip = True
+                            else:
+                                object_manip = False
                 
                 if len(obj_x) < 30 and len(obj_y) < 30:
                     print("object blocking path is static")
@@ -99,10 +109,11 @@ if __name__ == '__main__':
                     if count == 0:
                         path_mid, path_px_mid, cost_midastr = a_star(start_node, start_node_new, gmap1, movement='4N')
                         gmap1.plot()
+                        mid_path = start_node_new
                         plot_path(path_px_mid)
                         plt.show()
                     else: 
-                        path_mid, path_px_mid, cost_midstr2= a_star(start_node, start_node_new, gmap2, movement='4N')
+                        path_mid, path_px_mid, cost_midstr2= a_star(mid_path, start_node_new, gmap2, movement='4N')
                         gmap2.plot()
                         plot_path(path_px_mid)
                         plt.show()
@@ -112,7 +123,7 @@ if __name__ == '__main__':
                     print("object removed")
 
             #gmap_manip = OccupancyGridMap.from_png('fig2', 1)
-            path_rep, path_px_rep, cost_freepath = a_star(start_node_new, goal_node, gmap0, movement='4N')
+            path_rep, path_px_rep, cost_freepath = a_star(start_node_new, goal_node, gmap, movement='4N')
             print(path_rep)
             print('cost:', cost_freepath)
             if path_rep:
@@ -123,6 +134,8 @@ if __name__ == '__main__':
 
 
 
-    
+
+
+
     
     
